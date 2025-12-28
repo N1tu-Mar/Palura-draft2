@@ -8,8 +8,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float speed = 10f;
 
     [Header("Jumping")]
-    [SerializeField] float minJumpForce = 4f;        // initial jump for tap
-    [SerializeField] float maxJumpForce = 10f;       // max jump velocity
+    [SerializeField] float minJumpForce = 1f;        // initial jump for tap
+    [SerializeField] float maxJumpForce = 4f;       // max jump velocity
     [SerializeField] float maxJumpHoldTime = 0.25f;  // max time to hold jump
     [SerializeField] float jumpHoldAcceleration = 30f; // upward acceleration while holding
 
@@ -21,6 +21,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] LayerMask groundLayer;
     [SerializeField] float groundCheckDistance = 0.2f;
 
+    [SerializeField] private Animator _animator;
+
+
     bool isGrounded;
     bool isJumping;
     float jumpTimer;
@@ -29,6 +32,9 @@ public class PlayerMovement : MonoBehaviour
     {
         body = GetComponent<Rigidbody2D>();
         body.gravityScale = 0f; // manual gravity
+
+        _animator = GetComponent<Animator>();
+
     }
 
     private void Update()
@@ -98,4 +104,30 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawLine(transform.position, transform.position + Vector3.down * groundCheckDistance);
     }
+
+
+    private void HandleMovement()
+    {
+        // input will store a value between -1 and +1
+        // GetAxisRaw() returns exactly -1, 0, or +1
+        // GetAxis() returns a smooth value between -1 and +1
+        // A/D, Left/Right Arrow, and joystick map to "Horizontal"
+
+        float input = Input.GetAxis("Horizontal");
+        body.linearVelocity = new Vector3(input * speed, body.linearVelocity.y);
+        _animator.SetBool("isRunning", Mathf.Abs(input) > 0.1f);
+
+
+        if (input != 0)
+        {
+            _animator.SetBool("isRunning", true);
+        }
+        else
+        {
+            _animator.SetBool("isRunning", false); // ← FIXED
+        }
+    }
+
+
+
 }
